@@ -37,7 +37,7 @@
 ## 安装 3.7.x 版本
 
 ```bash
-composer create-project easy-swoole-php/easyswoole-skeleton project_name
+composer create-project yooer/easyswoole project_name
 ```
 
 
