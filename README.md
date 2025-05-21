@@ -8,6 +8,17 @@
 [![License](https://poser.pugx.org/easy-swoole-php/easyswoole-skeleton/license)](https://packagist.org/packages/easy-swoole-php/easyswoole-skeleton)
 [![Monthly Downloads](https://poser.pugx.org/easy-swoole-php/easyswoole-skeleton/d/monthly)](https://packagist.org/packages/easy-swoole-php/easyswoole-skeleton)
 
+# 更新部分功能
+
+原版代码在这里，在 [XueSiLf/easyswoole-docker](https://github.com/easy-swoole-php/easyswoole-skeleton) 
+作者比较忙，框架中有几个Bug，修改了几个文件
+- EasySwooleLib\Helper\Functions.php 
+	修改了 response 方法
+- EasySwooleLib\Response\Response.php
+- EasySwooleLib\Request\Request.php
+
+其他文件没有修改(移除了一些无用的配置文件 比如docker的)!
+
 # 骨架介绍
 
 这是一个使用 `EasySwoole` 框架搭建的骨架应用程序。这个骨架让开发者更容易使用 `EasySwoole` 框架。该应用程序旨在作为那些希望熟悉 `EasySwoole` 框架的人的起点。
