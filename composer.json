@@ -1,5 +1,5 @@
 {
-    "name": "easy-swoole-php/easyswoole-skeleton",
+    "name": "yooer/easyswoole",
     "type": "project",
     "description": "An efficient swoole framework",
     "keywords": [
