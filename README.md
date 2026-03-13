@@ -19,6 +19,31 @@
 
 其他文件没有修改(移除了一些无用的配置文件 比如docker的)!
 
+# 最近项目重构与功能更新 (2026-03-13)
+
+## 1. 架构调整与核心 Helper
+- **FastCache **: 并迁移至 `App/Helper/FastCache.php`，作为全局共享内存缓存。
+- **MongoDB 封装**: `MongoDbHelper` 与 `MongoDbPool` 迁移至 `App/Helper` 目录。
+- **全局初始化**: `FastCache` 与 `Mongo` 服务已在 `GlobalEvent.php` 中配置为服务启动时自动初始化。
+- **便捷函数**: 在 `App/Helper/Functions.php` 中新增了全局 Helper 函数：
+    - `cache()`: 获取 `FastCache` 实例。
+    - `mongo()`: 获取 `MongoDbHelper` 实例。
+
+## 2. 新增工具类 (App/Utility)
+- **PlatesRender.php**: 集成 `league/plates` 模板引擎，支持灵活的视图渲染。
+- **SendMail.php**: 基于 `PHPMailer` 的 SMTP 邮件发送工具，支持 HTML 格式。
+- **Telegram.php**: 支持富文本、图片、媒体组及内联键盘的 Telegram Bot 推送工具。
+
+## 3. 环境与配置
+- 新增配置项模板：
+    - `Config/cache.php`: 缓存配置。
+    - `Config/mongo.php`: MongoDB 连接池。
+    - `Config/smtp.php`: 邮件服务器设置。
+    - `Config/telegram.php`: 机器人 Token 与频道 ID。
+
+## 4. 依赖更新
+- 执行了 `composer update`，新增了 `mongodb/mongodb`、`phpmailer/phpmailer`、`guzzlehttp/guzzle`、`league/plates` 等必要依赖。
+
 # 骨架介绍
 
 这是一个使用 `EasySwoole` 框架搭建的骨架应用程序。这个骨架让开发者更容易使用 `EasySwoole` 框架。该应用程序旨在作为那些希望熟悉 `EasySwoole` 框架的人的起点。
@@ -49,6 +74,12 @@
 
 ```bash
 composer create-project yooer/easyswoole project_name
+```
+
+安装完显示PHPUnit依赖有问题，要解决这个问题，您需要使用以下命令更新 PHPUnit 到修复版本：
+
+```bash
+composer update phpunit/phpunit --with-dependencies
 ```
 
 
