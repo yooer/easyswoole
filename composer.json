@@ -39,14 +39,7 @@
         "easyswoole/verifycode": "3.1.2",
         "easyswoole/file-watcher": "dev-master",
         "psr/container": "2.0.2",
-        "easyapi/validate": "^1.0",
-        "mongodb/mongodb": "^2.",
-        "guzzlehttp/guzzle": "^7.0",
-        "easyswoole/jwt": "2.0.1",
-        "league/plates": "3.*",
-        "ramsey/uuid": "^4.0",
-        "voku/anti-xss": "^4",
-        "phpmailer/phpmailer": "^6.9.1"
+        "easyapi/validate": "^1.0"
     },
     "require-dev": {
         "swoole/ide-helper": "^5.1",
