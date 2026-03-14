@@ -1,7 +1,20 @@
 <?php
-if (!function_exists('user_func')) {
-    function user_func()
+if (!function_exists('cache')) {
+    /**
+     * @return \App\Helper\FastCache
+     */
+    function cache()
     {
-        return "Hello EasySwoole";
+        return \App\Helper\FastCache::getInstance();
+    }
+}
+
+if (!function_exists('mongo')) {
+    /**
+     * @return \App\Helper\MongoDbHelper
+     */
+    function mongo()
+    {
+        return \App\Helper\MongoDbHelper::getInstance();
     }
 }

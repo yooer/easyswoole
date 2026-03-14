@@ -4,6 +4,9 @@ namespace EasySwooleLib\Event;
 
 use EasySwoole\Command\CommandManager;
 use EasySwoole\Component\Di;
+use App\Utility\PlatesRender;
+use EasySwoole\EasySwoole\Config;
+use EasySwoole\EasySwoole\Logger;
 use EasySwoole\EasySwoole\Core;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
@@ -75,12 +78,6 @@ class GlobalEvent
             } else {
                 $mode = AppMode::currentAppMode();
             }
-
-            // load config
-            ConfigManager::loadConfig($mode);
-            $isLoadConfig = true;
-
-            Core::getInstance()->initialize();
         }
 
         if (!$mode) {
@@ -187,6 +184,22 @@ class GlobalEvent
         EasySwooleProcessManager::registerProcess();
     }
 
+    public static function initFastCache()
+    {
+        $config = config('cache');
+        if ($config && ($config['enable'] ?? false)) {
+            \App\Helper\FastCache::getInstance()->initTable();
+        }
+    }
+
+    public static function initMongo()
+    {
+        $config = config('mongo');
+        if ($config && ($config['enable'] ?? true)) {
+            \App\Helper\MongoDbHelper::getInstance();
+        }
+    }
+
     public static function registerQueue()
     {
         $queues = config('queue');
@@ -255,6 +268,8 @@ class GlobalEvent
         self::registerCrontab();
         self::registerProcess();
         self::registerQueue();
+        self::initFastCache();
+        self::initMongo();
     }
 
     public static function mainServerCreate(EventRegister $register)
