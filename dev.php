@@ -29,10 +29,9 @@ return [
         ],
         'TASK'           => [
             // 需使用task时开启
-            'workerNum' => 0,
-            // 'workerNum'     => 4,
-            // 'maxRunningNum' => 128,
-            // 'timeout'       => 15,
+            'workerNum'     => 4,
+            'maxRunningNum' => 128,
+            'timeout'       => 15,
         ],
         'CALLBACKS'      => [
             EventRegister::onWorkerStart => [\App\Server\Http\HttpServer::class, 'onWorkerStart'],
