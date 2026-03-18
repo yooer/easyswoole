@@ -48,7 +48,7 @@ trait SortedSetTrait
         string $key,
                $score,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -57,7 +57,7 @@ trait SortedSetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理
-        $val = self::serialize($value, $serializeType);
+        $val = self::serialize($value, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $score, $val, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -117,7 +117,7 @@ trait SortedSetTrait
     public static function zAdds(
         string $key,
         array  $data,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -129,7 +129,7 @@ trait SortedSetTrait
         $datas = [];
         foreach ($data as $index => $item) {
             if ($index % 2 === 0) {
-                $item = self::serialize($item, $serializeType);
+                $item = self::serialize($item, $serializeType, $connectionName);
             }
             $datas[$index] = $item;
         }
@@ -276,7 +276,7 @@ trait SortedSetTrait
         string $key,
                $value,
                $member,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -285,7 +285,7 @@ trait SortedSetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理member
-        $waitMember = self::serialize($member, $serializeType);
+        $waitMember = self::serialize($member, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $value, $waitMember, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -481,7 +481,7 @@ trait SortedSetTrait
                $min,
                $max,
         bool   $withScores = false,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -508,10 +508,10 @@ trait SortedSetTrait
             foreach ($result as $itemIndex => $itemValue) {
                 if ($withScores) {
                     $itemIndex           = (string)$itemIndex;
-                    $member              = self::unSerialize($itemIndex, $serializeType);
+                    $member              = self::unSerialize($itemIndex, $serializeType, $connectionName);
                     $lastResult[$member] = $itemValue;
                 } else {
-                    $lastResult[] = self::unSerialize($itemValue, $serializeType);
+                    $lastResult[] = self::unSerialize($itemValue, $serializeType, $connectionName);
                 }
             }
             $result = $lastResult;
@@ -559,7 +559,7 @@ trait SortedSetTrait
                $max,
         int    $offset = null,
         int    $limit = null,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -598,7 +598,7 @@ trait SortedSetTrait
             $lastResult = [];
             foreach ($result as $item) {
                 if ($item) {
-                    $itemValue = self::unSerialize($item, $serializeType);
+                    $itemValue = self::unSerialize($item, $serializeType, $connectionName);
                 } else {
                     $itemValue = $item;
                 }
@@ -650,7 +650,7 @@ trait SortedSetTrait
                $min,
                $max,
         array  $options = array(),
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -693,10 +693,10 @@ trait SortedSetTrait
         if ($result && is_array($result)) {
             foreach ($result as $itemIndex => $itemValue) {
                 if ($isWithScores) {
-                    $member              = self::unSerialize($itemIndex, $serializeType);
+                    $member              = self::unSerialize($itemIndex, $serializeType, $connectionName);
                     $lastResult[$member] = $itemValue;
                 } else {
-                    $lastResult[] = self::unSerialize($itemValue, $serializeType);
+                    $lastResult[] = self::unSerialize($itemValue, $serializeType, $connectionName);
                 }
             }
         }
@@ -735,7 +735,7 @@ trait SortedSetTrait
     public static function zRank(
         string $key,
                $member,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -744,7 +744,7 @@ trait SortedSetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理member
-        $waitMember = self::serialize($member, $serializeType);
+        $waitMember = self::serialize($member, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $waitMember, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -797,7 +797,7 @@ trait SortedSetTrait
     public static function zRem(
         string $key,
                $member,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -854,7 +854,7 @@ trait SortedSetTrait
     public static function zRems(
         string $key,
         array  $members,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -865,7 +865,7 @@ trait SortedSetTrait
         // 序列化处理members
         $waitMembers = [];
         foreach ($members as $member) {
-            $waitMembers[] = self::serialize($member, $serializeType);
+            $waitMembers[] = self::serialize($member, $serializeType, $connectionName);
         }
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $waitMembers, $dbIndex) {
@@ -1119,7 +1119,7 @@ trait SortedSetTrait
                $max,
                $min,
         array  $options = array(),
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -1162,10 +1162,10 @@ trait SortedSetTrait
         if ($result && is_array($result)) {
             foreach ($result as $itemIndex => $itemValue) {
                 if ($isWithScores) {
-                    $member              = self::unSerialize($itemIndex, $serializeType);
+                    $member              = self::unSerialize($itemIndex, $serializeType, $connectionName);
                     $lastResult[$member] = $itemValue;
                 } else {
-                    $lastResult[] = self::unSerialize($itemValue, $serializeType);
+                    $lastResult[] = self::unSerialize($itemValue, $serializeType, $connectionName);
                 }
             }
         }
@@ -1192,7 +1192,7 @@ trait SortedSetTrait
     public static function zRevRank(
         string $key,
                $member,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -1201,7 +1201,7 @@ trait SortedSetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理member
-        $waitMember = self::serialize($member, $serializeType);
+        $waitMember = self::serialize($member, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $waitMember, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -1248,7 +1248,7 @@ trait SortedSetTrait
     public static function zScore(
         string $key,
                $member,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -1257,7 +1257,7 @@ trait SortedSetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理member
-        $waitMember = self::serialize($member, $serializeType);
+        $waitMember = self::serialize($member, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $waitMember, $dbIndex) {
             if (!is_null($dbIndex)) {

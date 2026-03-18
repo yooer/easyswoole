@@ -32,7 +32,7 @@ trait SetTrait
     public static function sAdd(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -41,7 +41,7 @@ trait SetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理
-        $val = self::serialize($value, $serializeType);
+        $val = self::serialize($value, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $val, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -82,7 +82,7 @@ trait SetTrait
     public static function sAdds(
         string $key,
         array  $values,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -93,7 +93,7 @@ trait SetTrait
         // 序列化处理values
         $data = [];
         foreach ($values as $value) {
-            $data[] = self::serialize($value, $serializeType);
+            $data[] = self::serialize($value, $serializeType, $connectionName);
         }
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $data, $dbIndex) {
@@ -706,7 +706,7 @@ trait SetTrait
     public static function sIsMember(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -715,7 +715,7 @@ trait SetTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理value
-        $val = self::serialize($value, $serializeType);
+        $val = self::serialize($value, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $val, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -776,7 +776,7 @@ trait SetTrait
      */
     public static function sMembers(
         string $key,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -936,11 +936,15 @@ trait SetTrait
         // 反序列化处理
         if ($result) {
             if ($count === 1) {
-                $result = self::unSerialize($result, $serializeType);
+                $result = self::unSerialize($result, $serializeType, $connectionName);
             } else {
                 $lastResult = [];
                 foreach ($result as $item) {
-                    $lastResult[] = self::unSerialize($item, $serializeType);
+                    if ($item) {
+                        $lastResult[] = self::unSerialize($item, $serializeType, $connectionName);
+                    } else {
+                        $lastResult[] = $item;
+                    }
                 }
                 $result = $lastResult;
             }

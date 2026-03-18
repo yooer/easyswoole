@@ -194,7 +194,7 @@ trait HashTrait
     public static function hGet(
         string $key,
         string $hashKey,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -219,7 +219,7 @@ trait HashTrait
         }
 
         if ($result) {
-            $result = self::unSerialize($result, $serializeType);
+            $result = self::unSerialize($result, $serializeType, $connectionName);
         }
 
         return $result;
@@ -263,7 +263,7 @@ trait HashTrait
      */
     public static function hGetAll(
         string $key,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT)
     {
@@ -284,7 +284,7 @@ trait HashTrait
         $lastResult = [];
         if ($result) {
             foreach ($result as $itemKey => $itemValue) {
-                $lastResult[$itemKey] = self::unSerialize($itemValue, $serializeType);
+                $lastResult[$itemKey] = self::unSerialize($itemValue, $serializeType, $connectionName);
             }
         }
 
@@ -516,7 +516,7 @@ trait HashTrait
     public static function hMGet(
         string $key,
         array  $hashKeys,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -541,7 +541,7 @@ trait HashTrait
                 if (is_null($itemValue)) {
                     $itemValue = false;
                 } else {
-                    $itemValue = self::unSerialize($itemValue, $serializeType);
+                    $itemValue = self::unSerialize($itemValue, $serializeType, $connectionName);
                 }
                 $lastResult[$itemKey] = $itemValue;
             }
@@ -575,7 +575,7 @@ trait HashTrait
     public static function hMSet(
         string $key,
         array  $hashKeys,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -586,7 +586,7 @@ trait HashTrait
         // 序列化处理hashKeys
         $waitHashKeys = [];
         foreach ($hashKeys as $itemKey => $itemValue) {
-            $waitHashKeys[$itemKey] = self::serialize($itemValue, $serializeType);
+            $waitHashKeys[$itemKey] = self::serialize($itemValue, $serializeType, $connectionName);
         }
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $waitHashKeys, $dbIndex) {
@@ -638,7 +638,7 @@ trait HashTrait
         string $key,
         string $hashKey,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -691,7 +691,7 @@ trait HashTrait
         string $key,
         string $hashKey,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -763,7 +763,7 @@ trait HashTrait
      */
     public static function hVals(
         string $key,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -785,7 +785,7 @@ trait HashTrait
         $lastResult = [];
         if ($result) {
             foreach ($result as $item) {
-                $lastResult[] = self::unSerialize($item, $serializeType);
+                $lastResult[] = self::unSerialize($item, $serializeType, $connectionName);
             }
         }
 

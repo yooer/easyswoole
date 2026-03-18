@@ -20,7 +20,7 @@ class TelegramTask implements TaskInterface
         try {
             $channel = $this->data['channel'] ?? 'grounp';
             $tg = new Telegram($channel);
-            $tg->sendText($this->data['text']);
+            $tg->sendText($this->data['content']);
         } catch (\Throwable $e) {
             // 异步任务内部消化异常
         }

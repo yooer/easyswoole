@@ -168,7 +168,7 @@ trait StringTrait
      */
     public static function get(
         string $key,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -198,7 +198,7 @@ trait StringTrait
         self::handleException($command, $connectionName, $result, $allowNull);
 
         if ($result) {
-            $result = self::unSerialize($result, $serializeType);
+            $result = self::unSerialize($result, $serializeType, $connectionName);
         } else if (is_null($result)) {
             return false;
         }
@@ -231,7 +231,7 @@ trait StringTrait
     public static function getSet(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -239,7 +239,7 @@ trait StringTrait
         // 预处理key
         self::handleKeyPrefix($key, $connectionName);
 
-        $val = self::serialize($value, $serializeType);
+        $val = self::serialize($value, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $val, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -553,7 +553,7 @@ trait StringTrait
      * @param string       $key
      * @param int          $ttl            , in milliseconds.
      * @param string|mixed $value
-     * @param int          $serializeType  [optional]
+     * @param int|null     $serializeType  [optional]
      * @param int|null     $dbIndex        [optional]
      * @param string       $connectionName [optional]
      *
@@ -570,7 +570,7 @@ trait StringTrait
         string $key,
         int    $ttl,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -579,7 +579,7 @@ trait StringTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理
-        $val    = self::serialize($value, $serializeType);
+        $val    = self::serialize($value, $serializeType, $connectionName);
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $ttl, $val, $dbIndex) {
             if (!is_null($dbIndex)) {
                 $redis->select($dbIndex);
@@ -607,7 +607,7 @@ trait StringTrait
      * @param string          $key
      * @param string|mixed    $value
      * @param int|array|mixed $timeout        [optional] Calling setex() is preferred if you want a timeout.<br>
-     * @param int             $serializeType  [optional]
+     * @param int|null        $serializeType  [optional]
      *                                        对值做处理，支持RedisConfig::SERIALIZE_NONE/RedisConfig::SERIALIZE_PHP/RedisConfig::SERIALIZE_JSON
      * @param int|null        $dbIndex        [optional]
      * @param string          $connectionName [optional]
@@ -643,7 +643,7 @@ trait StringTrait
         string $key,
                $value,
                $timeout = 0,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -652,7 +652,7 @@ trait StringTrait
         self::handleKeyPrefix($key, $connectionName);
 
         // 序列化处理value
-        $val = self::serialize($value, $serializeType);
+        $val = self::serialize($value, $serializeType, $connectionName);
 
         $result = RedisPool::invoke(function (Redis $redis) use ($key, $val, $timeout, $dbIndex) {
             if (!is_null($dbIndex)) {
@@ -903,7 +903,7 @@ trait StringTrait
         string $key,
         int    $ttl,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -950,7 +950,7 @@ trait StringTrait
     public static function setnx(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )

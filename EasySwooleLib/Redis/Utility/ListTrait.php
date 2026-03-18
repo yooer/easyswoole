@@ -53,7 +53,7 @@ trait ListTrait
     public static function blPop(
         array  $keys,
         int    $timeout,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -142,7 +142,7 @@ trait ListTrait
     public static function brPop(
         array  $keys,
         int    $timeout,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -333,7 +333,7 @@ trait ListTrait
         bool   $isBefore,
         string $pivot,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -435,7 +435,7 @@ trait ListTrait
      */
     public static function lPop(
         string $key,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT)
     {
@@ -494,7 +494,7 @@ trait ListTrait
     public static function lPush(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -554,7 +554,7 @@ trait ListTrait
     public static function lPushs(
         string $key,
         array  $values,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -615,7 +615,7 @@ trait ListTrait
     public static function lPushx(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -672,7 +672,7 @@ trait ListTrait
         string $key,
         int    $start,
         int    $end,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -695,7 +695,7 @@ trait ListTrait
         if ($result) {
             foreach ($result as $item) {
                 if ($item) {
-                    $item = self::unSerialize($item, $serializeType);
+                    $item = self::unSerialize($item, $serializeType, $connectionName);
                 }
                 $lastResult[] = $item;
             }
@@ -741,7 +741,7 @@ trait ListTrait
         string $key,
                $value,
         int    $count,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -799,7 +799,7 @@ trait ListTrait
         string $key,
         int    $index,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -901,7 +901,7 @@ trait ListTrait
      */
     public static function rPop(
         string $key,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -922,7 +922,7 @@ trait ListTrait
         self::handleException($command, $connectionName, $result, $allowNull);
 
         if ($result) {
-            $result = self::unSerialize($result, $serializeType);
+            $result = self::unSerialize($result, $serializeType, $connectionName);
         } else if (is_null($result)) {
             $result = false;
         }
@@ -1042,7 +1042,7 @@ trait ListTrait
     public static function rPush(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -1101,7 +1101,7 @@ trait ListTrait
     public static function rPushs(
         string $key,
         array  $values,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
@@ -1162,7 +1162,7 @@ trait ListTrait
     public static function rPushx(
         string $key,
                $value,
-        int    $serializeType = RedisConfig::SERIALIZE_NONE,
+        int    $serializeType = null,
         int    $dbIndex = null,
         string $connectionName = self::DEFAULT_CONNECT
     )
