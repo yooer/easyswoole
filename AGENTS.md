@@ -23,11 +23,38 @@
     不允许在业务代码里自己 new Mongo 客户端。
   - **MongoDB 索引创建**：需要保证某个集合的索引存在时，必须调用全局函数
     `mongoIndex(string $collection, array $indexes)`（`App/Helper/Functions.php`），不允许直接调用
-    `mongo()->createIndex()` 裸建索引。原因：`mongoIndex()` 内部用 `FastCache` + 文件锁做了
-    跨进程/跨请求的"只建一次"保护，并强制加 `background => true`，避免高并发下每个请求/协程都对着
-    MongoDB 发建索引命令、锁表阻塞线上读写。调用时机上，应该放在服务启动初始化（如
-    `GlobalEvent`）或者对应 Model/Service 类的初始化逻辑里调用一次，不要放在每次请求都会
-    执行的路径里当裸调用用。
+    `mongo()->createIndex()` 裸建索引。原因：`mongoIndex()` 内部用 `FastCache`（`Swoole\Table`，
+    在 `GlobalEvent::initFastCache()` 里于 worker fork 之前创建，所有进程共享同一份数据）+ 文件锁
+    做了跨进程的"只建一次"保护，并强制加 `background => true`，避免高并发下每个请求/协程都对着
+    MongoDB 发建索引命令、锁表阻塞线上读写。
+    这个函数主要按"模块"维度用：哪个模块的 Service/Model 主要负责操作某个集合，就在那个模块里
+    调用 `mongoIndex()` 声明并保证这个集合的索引，索引定义跟着对应模块走。因为 `FastCache` 的
+    "已建索引"标记是跨进程共享的，索引真正建立后，任何 worker 后续再调用 `mongoIndex()` 都只是一次
+    内存缓存命中，不会碰文件锁也不会再打 MongoDB，所以**可以放心地放在该模块每次处理请求都会经过的
+    入口逻辑里调用**（比如 Service 方法开头），不需要额外限制成"只能在服务启动时调用一次"。
+    推荐写法：模块对应的 Model/Service 里用一个 `protected static $collection` 记录集合名，
+    加一个 `ensureIndex()` 静态方法集中列出索引定义并调用 `mongoIndex()`，构造函数里用一个
+    `static $indexChecked` 局部静态变量守一层，避免同一个 worker 进程里每次 `new` 都要多一次
+    `FastCache` 查询（`mongoIndex()` 本身的跨进程去重仍然保留，这里只是同进程内的再省一层）：
+
+    ```php
+    public function __construct()
+    {
+        static $indexChecked = false;
+        if (!$indexChecked) {
+            self::ensureIndex();
+            $indexChecked = true;
+        }
+    }
+
+    public static function ensureIndex(): void
+    {
+        mongoIndex(self::$collection, [
+            ['keys' => ['billId' => 1], 'options' => ['unique' => true, 'name' => 'billId_unique']],
+            ['keys' => ['userId' => 1, 'createTime' => -1], 'options' => ['name' => 'userId_time_idx']],
+        ]);
+    }
+    ```
   - **进程内缓存（Swoole Table）**：统一用 `App\Helper\FastCache`（单例，全局函数 `cache()`），
     不允许自己创建 `Swoole\Table`。
   - **Redis**：统一用 `EasySwooleLib\Redis\Utility\RedisUtil` 门面方法，不允许自己拿连接池连接
