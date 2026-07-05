@@ -268,6 +268,22 @@ class MongoDbHelper
         }
     }
 
+    // 原生批量更新数据（不过滤 $set） - 使用连接池
+    public function updateMany(string $collection, array $filter, array $update, array $options = [])
+    {
+        try {
+            return $this->usePooledClient(function ($client) use ($collection, $filter, $update, $options) {
+                $result = $client->selectDatabase($this->dbname)
+                    ->selectCollection($collection)
+                    ->updateMany($filter, $update, $options);
+                return $result->getModifiedCount();
+            });
+        } catch (\Throwable $e) {
+            AppLog::error("MongoDB 批量更新错误: MongoDbHelper::updateMany() " . $e->getMessage(), 'error');
+            return false;
+        }
+    }
+
     // 只删除一条数据 - 使用连接池
     public function delete(string $collection, array $filter, array $options = [])
     {
@@ -357,8 +373,9 @@ class MongoDbHelper
     {
         try {
             return $this->usePooledClient(function ($client) use ($collection, $filter, $pipsql) {
+                $matchFilter = empty($filter) ? (object)[] : $filter;
                 $pipeline = [
-                    ['$match' => $filter],
+                    ['$match' => $matchFilter],
                     ['$group' => $pipsql]
                 ];
                 $result = $client->selectDatabase($this->dbname)
@@ -373,6 +390,26 @@ class MongoDbHelper
             });
         } catch (\Throwable $e) {
             AppLog::error("MongoDB 聚合查询:  MongoDbHelper::pipe() " . $e->getMessage(), 'error');
+            return false;
+        }
+    }
+
+    // 原生完整聚合查询
+    public function aggregate(string $collection, array $pipeline, array $options = [])
+    {
+        try {
+            return $this->usePooledClient(function ($client) use ($collection, $pipeline, $options) {
+                $result = $client->selectDatabase($this->dbname)
+                    ->selectCollection($collection)
+                    ->aggregate($pipeline, $options);
+                $data = $result->toArray();
+                if (!empty($data)) {
+                    return self::Json($data);
+                }
+                return [];
+            });
+        } catch (\Throwable $e) {
+            AppLog::error("MongoDB 原生聚合查询: MongoDbHelper::aggregate() " . $e->getMessage(), 'error');
             return false;
         }
     }
@@ -431,6 +468,38 @@ class MongoDbHelper
             });
         } catch (\Throwable $e) {
             AppLog::error("MongoDB 自增长ID错误:  MongoDbHelper::autoId() " . $e->getMessage(), 'error');
+            return false;
+        }
+    }
+
+    // 获取批量自增长ID
+    public function autoIds(string $field, int $count)
+    {
+        if ($count <= 0) return false;
+        if ($count === 1) {
+            $id = $this->autoId($field);
+            return $id ? ['start' => $id, 'end' => $id] : false;
+        }
+        try {
+            return $this->usePooledClient(function ($client) use ($field, $count) {
+                $command = [
+                    'findAndModify' => "autoId",
+                    'query' => ['field' => $field],
+                    'update' => ['$inc' => ['id' => $count]],
+                    'upsert' => true,
+                    'new' => true
+                ];
+                $result = $client->selectDatabase($this->dbname)->command($command)->toArray();
+                if (isset($result[0]['ok']) && $result[0]['ok']) {
+                    return [
+                        'start' => $result[0]['value']['id'] - $count + 1,
+                        'end'   => $result[0]['value']['id']
+                    ];
+                }
+                return false;
+            });
+        } catch (\Throwable $e) {
+            AppLog::error("MongoDB 批量自增长ID错误:  MongoDbHelper::autoIds() " . $e->getMessage(), 'error');
             return false;
         }
     }

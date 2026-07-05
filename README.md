@@ -50,17 +50,32 @@
 
 # 安装要求
 
-`EasySwoole` 对系统环境有一些要求，只能在 `Linux` 和 `Mac` 环境下运行，但由于 `Docker` 虚拟化技术的发展，在 `Windows` 下 `Docker for Windows` 也可以作为运行环境。
+`EasySwoole` 对系统环境有一些要求，只能在 `Linux` 和 `Mac` 环境下运行。你的运行环境需要满足以下要求：
 
-各个版本的 `Dockerfile` 在 [XueSiLf/easyswoole-docker](https://github.com/XueSiLf/easyswoole-docker) 项目中已经给你准备好了，或者直接基于 `EasySwoole` 官方已经构建的 [easyswoolexuesi2021/easyswoole](https://hub.docker.com/repository/docker/easyswoolexuesi2021/easyswoole) 镜像来运行。
-
-当你不想使用 `Docker` 作为运行环境时，你需要确保你的运行环境满足以下要求：
-
-- PHP >= 7.4
-- Swoole PHP 扩展 >= 4.4.23 且 Swoole PHP 扩展 <= 4.4.26
+- PHP >= 8.1
+- Swoole PHP 扩展（具体版本兼容范围参考 `composer.json` 及 `deploy/` 目录下的部署脚本说明）
 - JSON PHP 扩展
 - Pcntl PHP 扩展
 - OpenSSL PHP 扩展（如果需要使用 `HTTPS`）
+
+# 一键部署脚本（Ubuntu 24.04 + 宝塔）
+
+如果你的服务器是 Ubuntu 24.04，已经装好宝塔面板（aaPanel）和对应的 PHP，可以直接用
+[`deploy/bt-swoole-mongodb-setup.sh`](deploy/bt-swoole-mongodb-setup.sh) 一键处理：
+
+- 自动探测宝塔已装的 PHP 版本，按版本自动匹配可用的 Swoole / MongoDB 扩展版本并源码编译安装
+- 写入 php.ini 并重启 php-fpm
+- 写入 `/etc/security/limits.conf`、`/etc/sysctl.conf` 的 ulimit / 内核参数优化（幂等，可重复执行）
+- 跑完自动做一次自检（扩展加载情况、关键内核参数当前值）
+
+```bash
+sudo bash deploy/bt-swoole-mongodb-setup.sh
+```
+
+**注意**：脚本默认不会给 PHP 8.4 装 Swoole——Swoole 6.0+ 才支持 PHP 8.4，但 6.0+ 彻底移除了
+`Swoole\Coroutine\MySQL`/`Redis`，会直接弄坏本项目依赖的 `easyswoole/mysqli`（ORM）和
+`easyswoole/redis-pool`，所以本项目暂时只能用 PHP 8.0-8.3。具体版本映射表和可用的环境变量
+（`PHP_VERSION`、`SWOOLE_VERSION`、`MONGODB_VERSION` 等）见脚本头部注释。
 
 # 使用 Composer 安装
 
@@ -85,7 +100,7 @@ composer update phpunit/phpunit --with-dependencies
 
 # 建议
 
-- 建议您将骨架中部分文件中的项目名称重命名为您实际的项目名称，例如像 `composer.json` 和 `docker-compose.yml` 这样的文件。
+- 建议您将骨架中部分文件中的项目名称重命名为您实际的项目名称，例如 `composer.json`。
 - 查看 `App/HttpController/Index.php` 以查看 HTTP 入口点的示例。
 
 **请记住**：您始终可以将此 `README.md` 文件的内容替换为适合您项目的内容描述。
