@@ -21,6 +21,13 @@
     下（命名 `<业务名>Service`），不要把这些逻辑堆在 Controller 或 Model 里。
   - **MongoDB**：统一用 `App\Helper\MongoDbHelper`（单例，全局函数 `mongo()` 可直接取实例），
     不允许在业务代码里自己 new Mongo 客户端。
+  - **MongoDB 索引创建**：需要保证某个集合的索引存在时，必须调用全局函数
+    `mongoIndex(string $collection, array $indexes)`（`App/Helper/Functions.php`），不允许直接调用
+    `mongo()->createIndex()` 裸建索引。原因：`mongoIndex()` 内部用 `FastCache` + 文件锁做了
+    跨进程/跨请求的"只建一次"保护，并强制加 `background => true`，避免高并发下每个请求/协程都对着
+    MongoDB 发建索引命令、锁表阻塞线上读写。调用时机上，应该放在服务启动初始化（如
+    `GlobalEvent`）或者对应 Model/Service 类的初始化逻辑里调用一次，不要放在每次请求都会
+    执行的路径里当裸调用用。
   - **进程内缓存（Swoole Table）**：统一用 `App\Helper\FastCache`（单例，全局函数 `cache()`），
     不允许自己创建 `Swoole\Table`。
   - **Redis**：统一用 `EasySwooleLib\Redis\Utility\RedisUtil` 门面方法，不允许自己拿连接池连接
