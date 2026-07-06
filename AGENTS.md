@@ -96,8 +96,8 @@
   - `public/assets/css/` — 业务自己写的 CSS
   - `public/assets/image/` — 图片
   - `public/assets/libs/` — 第三方框架/库（jQuery、Vue、Bootstrap 等），和业务自己写的资源分开存放
-  - `public/static/image/<模块名>/` — 某个具体模块专属的图片资源
-  - `public/static/css/<模块名>/` — 某个具体模块专属的 CSS 资源（同样按模块名分目录存放）
+  - `public/assets/image/<模块名>/` — 某个具体模块专属的图片资源
+  - `public/assets/css/<模块名>/` — 某个具体模块专属的 CSS 资源（同样按模块名分目录存放）
 
 ## 5. 模板与样式规范
 
@@ -106,5 +106,5 @@
 - 页面对应的样式必须写在独立的 CSS 文件里，放在 `public/assets/css/` 下，文件名和页面/模块对应
   （例如后台首页面板对应 `public/assets/css/dash.css`，某个模块的专属设置页对应
   `public/assets/css/<模块名>.css`），页面里用 `<link>` 引用。如果某个模块的样式文件比较多、
-  不止一个，就归到 `public/static/css/<模块名>/` 目录下按模块分类存放，不强制都塞进单个文件。
+  不止一个，就归到 `public/assets/css/<模块名>/` 目录下按模块分类存放，不强制都塞进单个文件。
 - JS 代码允许留在 HTML 页面内，不强制外链成单独文件。
